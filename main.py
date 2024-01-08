@@ -59,14 +59,19 @@ def listener(message):
 
 
 def temp_mail():
-    test = Email()
-    # Make new email address
-    test.register()
-    email = str(test.address)
+    #TODO: If it dosent work, create a fake email. Maybe it will also work.
+    try: 
+        test = Email()
+        # Make new email address
+        test.register()
+        email = str(test.address)
+        return email
+    except:
+        email = random_username(15) + "@gmail.com"
+        return email
 
     # test.start(listener)
     # test.stop
-    return email
 
 # Very bad looking usernames
 def random_username(max_characters):
