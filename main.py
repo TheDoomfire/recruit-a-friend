@@ -4,9 +4,13 @@ import random
 import string
 import re
 from playwright.sync_api import Playwright, sync_playwright, expect
+import tkinter as tk # for the GUI
+import threading
 
 
 # Refer a Friend (RaF) Palia
+
+raf_counter = 0
 
 
 def run(playwright: Playwright, email, username, password, url) -> None:
@@ -100,10 +104,20 @@ def random_password(length_of_password):
 
 def create_referral_code_url(input_strings):
     pattern = re.compile(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
-    match = re.search(pattern, input_strings)
-    url = None
+    #match = re.search(pattern, input_strings)
+    matches = pattern.findall(input_strings)
+    urls = []
+    print(matches)
 
-    # Check if the pattern is found
+    if matches:
+        matches = set(matches)
+        for match in matches:
+            print(match)
+            url = "https://accounts.palia.com/sign-up?referral=" + match
+            urls.append(url)
+    return urls
+
+"""     # Check if the pattern is found
     if match:
         # If found, get the matched string using group(0)
         matched_pattern = match.group(0)
@@ -113,21 +127,26 @@ def create_referral_code_url(input_strings):
         print("Pattern found:", matched_pattern)
     else:
         print("Pattern not found.")
-    return url
+    return url """
 
 
 def palia_raf(url):
-    raf_url = create_referral_code_url(url)
-    if raf_url is not None:
+    raf_urls = create_referral_code_url(url)
+    if raf_urls is not None:
         with sync_playwright() as playwright:
-            for i in range(5):
-                email = temp_mail()
-                username = random_username(20) #+ str(i)
-                password = random_password(15) #'6n*"37Hnt3+q'
-                print(email)
-                print(username)
-                print(password)
-                #run(playwright, email, username, password, url) # Need to add URL
+            for raf_url in raf_urls:
+                print("URL: ", raf_url)
+                for i in range(5):
+                    global raf_counter
+                    raf_counter += 1
+                    #email = temp_mail()
+                    username = random_username(20) #+ str(i)
+                    password = random_password(15) #'6n*"37Hnt3+q'
+                    #print(email)
+                    print(username)
+                    print(password)
+                    time.sleep(2)
+                    #run(playwright, email, username, password, raf_url) # Need to add URL
     else:
         print("Wrong URL.")
 
@@ -135,11 +154,60 @@ def palia_raf(url):
 # Create a GUI (Tkinter is okey)
 # Make a textbox
 # Make it work with a list of referral codes.
+        
+# GUI
+""" root = tk.Tk()
+
+root.geometry("500x500")
+root.title("RAF Palia")
+
+label = tk.Label(root, text="Hello World", font=("Arial", 18))
+label.pack(padx=20, pady=20)
+
+textbox = tk.Text(root, height=5, font=("Arial", 16))
+textbox.pack(padx=10)
+
+button = tk.Button(root, text="Click", font=("Arial", 18))
+button.pack()
+
+# maybe not use this.
+#myentry = tk.Entry(root)
+#myentry.pack()
+
+root.mainloop() """
+
+progress_counter = "Progress..."
+
+class MyGUI:
+    def __init__(self):
+        self.root = tk.Tk() #start
+
+        self.label = tk.Label(self.root, text="Recruit a Friend Palia", font=("Arial", 18))
+        self.label.pack(padx=20, pady=20)
+
+        self.textbox = tk.Text(self.root, height=5, font=("Arial", 16))
+        self.textbox.pack(padx=10)
+
+        self.button = tk.Button(self.root, text="Click", font=("Arial", 18), command=self.show_message)
+        self.button.pack()
+
+        self.label_progress = tk.Label(self.root, text="Status", font=("Arial", 16))
+        self.label_progress.pack(padx=20, pady=20)
+
+        self.root.mainloop() #end
+
+    def show_message(self):
+        all_raf = self.textbox.get("1.0", tk.END)
+        self.label_progress.config(text="Please wait...")
+        palia_raf(all_raf)
+        self.root.after(50, lambda: self.label_progress.config(text="Completed."))
+
 
 def main():
     print("Main")
     url = "https://accounts.palia.com/sign-up?referral=6c12dc58-f439-4291-9909-e4fef36cb237"
-    palia_raf(url)
+    MyGUI()
+    #palia_raf(url)
 
 
 if __name__ == '__main__':
