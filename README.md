@@ -13,3 +13,11 @@ Activate it - Win: `source .venv/Scripts/activate` Mac: `source .venv/bin/activa
 
 `pip freeze > requirements.txt` - Create the requirements.txt
 `pip install -r requirements.txt` - Installs it.
+
+### Create a .exe file
+
+`pyinstaller --icon=chapaa-glider.ico main.py --onefile --noconsole`
+
+1. **--noconsole** removes the command window
+1. **--onefile** makes it only one file compared to several
+1. **--icon=** app icon
